@@ -22,13 +22,18 @@ from sklearn.metrics import (
 
 
 class MyDataset(Dataset):
-    def get_data(self, Ai, A_encoders, ij):
+    # def get_data(self, Ai, A_encoders, ij):
+    # only Ai
+    def get_data(self, Ai, ij):
         data = []
         for item in ij:
             feature = np.array(
                 [
-                    np.hstack((Ai[0][item[0]], A_encoders[0][item[0]])),
-                    np.hstack((Ai[0][item[1]], A_encoders[0][item[1]])),
+                    # np.hstack((Ai[0][item[0]], A_encoders[0][item[0]])),
+                    # np.hstack((Ai[0][item[1]], A_encoders[0][item[1]])),
+                    # only Ai
+                    np.hstack((Ai[0][item[0]])),
+                    np.hstack((Ai[0][item[1]])),
                 ]
             )
             for dim in range(1, Ai.shape[0]):
@@ -37,8 +42,11 @@ class MyDataset(Dataset):
                         feature,
                         np.array(
                             [
-                                np.hstack((Ai[dim][item[0]], A_encoders[dim][item[0]])),
-                                np.hstack((Ai[dim][item[1]], A_encoders[dim][item[1]])),
+                                # np.hstack((Ai[dim][item[0]], A_encoders[dim][item[0]])),
+                                # np.hstack((Ai[dim][item[1]], A_encoders[dim][item[1]])),
+                                # only Ai
+                                np.hstack((Ai[dim][item[0]])),
+                                np.hstack((Ai[dim][item[1]])),
                             ]
                         ),
                     )
@@ -48,18 +56,19 @@ class MyDataset(Dataset):
 
     def __init__(self, network_num, fold, positive_ij, negative_ij, mode, dataset):
         super().__init__()
-        Ai = []
+        # Ai = []
         A_encoders = []
         for i in range(network_num):
-            A = np.load(
-                "./our_dataset/"
-                + dataset
-                + "/A/A_"
-                + str(fold + 1)
-                + "_"
-                + str(i + 1)
-                + ".npy"
-            )
+            # A = np.load(
+            #     "./our_dataset/"
+            #     + dataset
+            #     + "/A/A_"
+            #     + str(fold + 1)
+            #     + "_"
+            #     + str(i + 1)
+            #     + ".npy"
+            # )
+            # only Ai
             A_encoder = np.load(
                 "./our_dataset/"
                 + dataset
@@ -69,12 +78,17 @@ class MyDataset(Dataset):
                 + str(i + 1)
                 + ".npy"
             )
-            Ai.append(A)
+            # Ai.append(A)
+            # only Ai
             A_encoders.append(A_encoder)
-        Ai = np.array(Ai)
+        # Ai = np.array(Ai)
+        # only Ai
         A_encoders = np.array(A_encoders)
-        positive_data = torch.Tensor(self.get_data(Ai, A_encoders, positive_ij))
-        negative_data = torch.Tensor(self.get_data(Ai, A_encoders, negative_ij))
+        # only Ai
+        # positive_data = torch.Tensor(self.get_data(Ai, A_encoders, positive_ij))
+        # negative_data = torch.Tensor(self.get_data(Ai, A_encoders, negative_ij))
+        positive_data = torch.Tensor(self.get_data(A_encoders, positive_ij))
+        negative_data = torch.Tensor(self.get_data(A_encoders, negative_ij))
 
         data = torch.cat((positive_data, negative_data)).transpose(2, 1)
         self.data = data
